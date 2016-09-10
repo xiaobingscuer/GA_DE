@@ -97,7 +97,6 @@ public class GAOptimalOne {
 	public float[] evlution(float[] population){
 		float[] newPopulation=new float[population.length];
 		double[] fitList=new double[population.length];
-		Random rand=new Random();
 		newPopulation=population;
 		for(int i=0;i<EVALUTION_NUM;i++){
 			fitList=fitnessList(newPopulation);			// ÊÊÓ¦¶ÈÆÀ¹À
