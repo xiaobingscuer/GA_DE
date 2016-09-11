@@ -7,6 +7,7 @@ import java.util.Random;
 // 此程序中，f(x)=(x-2)^2,最优解为 2.000
 // 差分进化算法采用实数编码，轮盘赌选择，繁殖方式为newPopulation[i]=population[r1]+(population[r2]-population[r3])
 // 由于f(x)>0,故个体适应度评估函数为 1/f(x)
+// 最后输出比遗传算法的结果更快、更稳定、更优
 /////////
 public class DEOptimalOne {
 	// 种群规模
@@ -14,7 +15,7 @@ public class DEOptimalOne {
 	// 进化代数
 	private final int EVALUTION_NUM=100;
 	// 繁殖概率
-	private final float BREED_PROBABLITY=0.9F;
+	private final float BREED_PROBABLITY=0.1F;
 	// x域
 	float max=5;
 	float min=-5;
@@ -48,28 +49,20 @@ public class DEOptimalOne {
 		for(int i=0;i<population.length;i++){
 			fitList[i]=fitList[i]/sum;				    // 求每个适应度所占比例，population[i]/sum，即将适应度转化为概率
 		}
-		for(int i=0;i<population.length-1;i++){
-			fitList[i+1]+=fitList[i];					// 对这些概率求累计概率，代替适应度表，方便在轮盘赌的时候进行选择
-		}
 		return fitList;
 	}
-	// 选择 轮盘赌选择
-	public float[] choice(float[] population,double[] fitnessList){
-		float[] newPopulation=new float[population.length];
-		Random rand=new Random();
-		for(int i=0;i<population.length;i++){			// 轮盘赌选择，进行种群population.length次选择
-			for(int j=0;j<population.length;j++){		// 每次判断选中的是哪个个体
-				if(rand.nextFloat()<fitnessList[j]){
-					newPopulation[i]=population[j];		// 选出被选中的个体
-					break;
-				}
-			}			
+	// 选择 //和之前的适应度比较，适应度比以前大就保留新的个体，否则保留以前的个体
+	public float[] choice(float[] population,double[] fitnessList,float[] newPopulation,double[] newFitnessList){
+		for(int i=0;i<population.length;i++){
+			if(newFitnessList[i]<fitnessList[i]){
+				newPopulation[i]=population[i];
+			}
 		}
 		return newPopulation;
 	}
 	// 繁殖,将遗传算法的交叉操作和变异操作合并为繁殖操作
 	public float[] breed(float[] population){
-		float[] newPopulation=new float[population.length];
+		float[] newPopulation =new float[population.length];
 		Random rand=new Random();
 		int r1,r2,r3;
 		for(int i=0;i<population.length;i++){
@@ -95,13 +88,16 @@ public class DEOptimalOne {
 	}
 	// 进化
 	public float[] evlution(float[] population){
-		float[] newPopulation;
+		float[] newPopulation = null;
 		double[] fitList;
-		newPopulation=population;
+		double[] newFitList;
 		for(int i=0;i<EVALUTION_NUM;i++){
-			fitList=fitnessList(newPopulation);			// 适应度评估
-			newPopulation=choice(newPopulation,fitList);// 个体选择
-			newPopulation=breed(newPopulation);			// 繁殖
+			fitList=fitnessList(population);			// 上一代适应度评估
+			newPopulation=breed(population);			// 繁殖
+			newFitList=fitnessList(newPopulation);		// 新一代适应度评估
+			newPopulation=choice(population,fitList,newPopulation,newFitList);// 个体选择
+			population=newPopulation;
+			
 		}
 		return newPopulation;
 	}

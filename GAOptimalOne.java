@@ -70,6 +70,7 @@ public class GAOptimalOne {
 				}
 			}			
 		}
+		population=null;
 		return newPopulation;
 	}
 	// 交叉
@@ -78,11 +79,11 @@ public class GAOptimalOne {
 		Random rand=new Random();						// 差分进化算法DE中就采用的实数编码，将交叉和变异合并为繁殖
 		// 实数编码无交叉
 		newPopulation=population;
+		population=null;
 		return newPopulation;
 	}
 	// 变异
 	public float[] mutate(float[] population){
-		float[] newPopulation;
 		Random rand=new Random();
 		for(int i=0;i<population.length;i++){
 			if(rand.nextFloat()<MUTATE_PROBABLITY){
@@ -94,21 +95,18 @@ public class GAOptimalOne {
 				}
 			}
 		}
-		newPopulation=population;
-		return newPopulation;
+		return population;
 	}
 	// 进化
 	public float[] evlution(float[] population){
-		float[] newPopulation;
 		double[] fitList;
-		newPopulation=population;
 		for(int i=0;i<EVALUTION_NUM;i++){
-			fitList=fitnessList(newPopulation);			// 适应度评估
-			newPopulation=choice(newPopulation,fitList);// 个体选择
-			newPopulation=cross(newPopulation);			// 个体间交叉
-			newPopulation=mutate(newPopulation);		// 个体变异
+			fitList=fitnessList(population);			// 适应度评估
+			population=choice(population,fitList);// 个体选择
+			population=cross(population);			// 个体间交叉
+			population=mutate(population);		// 个体变异
 		}
-		return newPopulation;
+		return population;
 	}
 	// 从进化相应代数的种群中选出最优个体
 	public float[] bestPerson(float[] population){
