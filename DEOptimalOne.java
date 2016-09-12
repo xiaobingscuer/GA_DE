@@ -5,7 +5,7 @@ import java.util.Random;
 // topic:DE algorithm one,关于差分进化算法（一）
 // 这是用 差分进化算法 求解一维 最优问题: min f(x),x的范围(-5,5)
 // 此程序中，f(x)=(x-2)^2,最优解为 2.000
-// 差分进化算法采用实数编码，轮盘赌选择，繁殖方式为newPopulation[i]=population[r1]+(population[r2]-population[r3])
+// 差分进化算法采用实数编码，轮盘赌选择，繁殖方式为newPopulation[i]=population[r1]+CROSS_FACTOR*(population[r2]-population[r3])
 // 由于f(x)>0,故个体适应度评估函数为 1/f(x)
 // 最后输出比遗传算法的结果更快、更稳定、更优
 /////////
@@ -14,8 +14,10 @@ public class DEOptimalOne {
 	private final static  int POPULATION_SCALE=1000;
 	// 进化代数
 	private final int EVALUTION_NUM=100;
-	// 繁殖概率
-	private final float BREED_PROBABLITY=0.1F;
+	// 交叉概率
+	private final float CROSS_PROBABLITY=0.1F;
+	// 交叉因子
+	private final float CROSS_FACTOR=0.5F;
 	// x域
 	float max=5;
 	float min=-5;
@@ -66,7 +68,7 @@ public class DEOptimalOne {
 		Random rand=new Random();
 		int r1,r2,r3;
 		for(int i=0;i<population.length;i++){
-			if(rand.nextFloat()<BREED_PROBABLITY){		// 判断是否需要繁殖
+			if(rand.nextFloat()<CROSS_PROBABLITY){		// 判断是否需要繁殖
 				r1=rand.nextInt(population.length);
 				do{
 					r2=rand.nextInt(population.length);
@@ -74,7 +76,7 @@ public class DEOptimalOne {
 				do{
 					r3=rand.nextInt(population.length);
 				}while(r3==r2||r3==r1);
-				newPopulation[i]=population[r1]+(population[r2]-population[r3]); // 繁殖方式
+				newPopulation[i]=population[r1]+CROSS_FACTOR*(population[r2]-population[r3]); // 繁殖方式
 				if(newPopulation[i]>5){					// 判断个体是否在x域里
 					newPopulation[i]=5;
 				}if(newPopulation[i]<-5){
