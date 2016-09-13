@@ -7,7 +7,7 @@ import java.util.Random;
 // 此程序中，f(x)=(x-2)^2,最优解为 2.000
 // 差分进化算法采用实数编码，轮盘赌选择，繁殖方式为newPopulation[i]=population[r1]+CROSS_FACTOR*(population[r2]-population[r3])
 // 由于f(x)>0,故个体适应度评估函数为 1/f(x)
-// 最后输出比遗传算法的结果更快、更稳定、更优
+// 最后输出比遗传算法的结果更快、更稳定、更能满足精度要求
 /////////
 public class DEOptimalOne {
 	// 种群规模
@@ -19,8 +19,8 @@ public class DEOptimalOne {
 	// 交叉因子
 	private final float CROSS_FACTOR=0.5F;
 	// x域
-	float max=5;
-	float min=-5;
+	private final float MAX=5F;
+	private final float MIN=-5F;
 		
 	public DEOptimalOne() {
 		super();
@@ -31,25 +31,19 @@ public class DEOptimalOne {
 		float[] population = new float[scale];
 		Random rand=new Random();
 		for(int i=0;i<scale;i++){
-			population[i]=rand.nextFloat()*10-5;		// 随机生成(-5,5)区间的个体
+			population[i]=rand.nextFloat()*(MAX-MIN)+MIN;		// 随机生成(-5,5)区间的个体
 		}
 		return population;
 	}
 	// 个体适应度评估 
-	public double evaluatePerson(float person){
-		double fitness=1/Math.pow(person-2,2); 			// 1/f(x),即 1/(x-2)^2
-		return fitness;
+	public double evaluatePerson(float person){		
+		return 1/Math.pow(person-2,2); 			// 1/f(x),即 1/(x-2)^2
 	}
 	// 种群适应度表
 	public double[] fitnessList(float[] population){
 		double[] fitList=new double[population.length]; // 每个个体的适应度表fitness
-		double sum=0;
 		for(int i=0;i<population.length;i++){
 			fitList[i]=evaluatePerson(population[i]);	// 评估种群population中的个体population[i]的适应度
-			sum+=fitList[i];							// 对这些适应度进行累加求和
-		}
-		for(int i=0;i<population.length;i++){
-			fitList[i]=fitList[i]/sum;				    // 求每个适应度所占比例，population[i]/sum，即将适应度转化为概率
 		}
 		return fitList;
 	}
@@ -69,7 +63,7 @@ public class DEOptimalOne {
 		int r1,r2,r3;
 		for(int i=0;i<population.length;i++){
 			if(rand.nextFloat()<CROSS_PROBABLITY){		// 判断是否需要繁殖
-				r1=rand.nextInt(population.length);
+				r1=rand.nextInt(population.length);		// 随机产生3个互不相同的个体
 				do{
 					r2=rand.nextInt(population.length);
 				}while(r2==r1);
@@ -77,11 +71,11 @@ public class DEOptimalOne {
 					r3=rand.nextInt(population.length);
 				}while(r3==r2||r3==r1);
 				newPopulation[i]=population[r1]+CROSS_FACTOR*(population[r2]-population[r3]); // 繁殖方式
-				if(newPopulation[i]>5){					// 判断个体是否在x域里
-					newPopulation[i]=5;
-				}if(newPopulation[i]<-5){
-					newPopulation[i]=-5;
-				}
+//				if(newPopulation[i]>MAX){					// 判断个体是否在x域里
+//					newPopulation[i]=MAX;
+//				}if(newPopulation[i]<MIN){
+//					newPopulation[i]=MIN;
+//				}
 			}else{
 				newPopulation[i]=population[i];
 			}
@@ -99,7 +93,10 @@ public class DEOptimalOne {
 			newFitList=fitnessList(newPopulation);		// 新一代适应度评估
 			newPopulation=choice(population,fitList,newPopulation,newFitList);// 个体选择
 			population=newPopulation;
-			
+			float[] best=bestPerson(population);
+			if(Math.abs(best[1]-2.0)<0.001){			// 满足 精度要求 后可提前退出
+				break;
+			}			
 		}
 		return newPopulation;
 	}
@@ -107,9 +104,6 @@ public class DEOptimalOne {
 	public float[] bestPerson(float[] population){
 		float[] bestPer = new float[2];
 		double[] fitList=fitnessList(population);
-		for(int i=population.length-1;i>0;i--){
-			fitList[i]-=fitList[i-1];					// 将累计概率的适应度表转回为概率
-		}		
 		for(int i=0;i<population.length;i++){
 			if(bestPer[0]<fitList[i]){					// 选出适应度值最大的个体
 				bestPer[0]=(float) fitList[i];			// bestPer[0]记录最大是适应度值
